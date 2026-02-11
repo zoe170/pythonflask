@@ -1,0 +1,41 @@
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return """
+    <h1>Bienvenue sur ma page d'accueil !</h1>
+    <a href="/about">Aller vers la page À propos</a><br>
+    <a href="/project">Aller vers la page Projet</a>
+    """
+
+@app.route('/about')
+def about():
+    return """
+    <h1>À propos</h1>
+    <p>Je suis en train d'apprendre à développer des applications web avec Flask !</p>
+    <a href="/">Retour à l'accueil</a>
+    """
+
+@app.route('/project')
+def project():
+    return """
+    <h1>Page Projet</h1>
+    <p>Bienvenue sur ma page projet !</p>
+    <a href="/">Retour à l'accueil</a>
+    """
+
+
+@app.route('/map')
+def map():
+    return "<a href='file:///C:/Users/bonin/TP1Git/PythonFlask/template/map.html'>Voir la carte</a>" 
+    <h1>Carte de localisation</h1>
+    <a href="/">Retour à l'accueil</a>
+    <iframe src="/template/map.html" width="100%" height="500px"></iframe>
+    """
+
+
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5001)

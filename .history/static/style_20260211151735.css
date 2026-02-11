@@ -1,0 +1,50 @@
+/* RESET */
+body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(120deg, #2b5876, #4e4376);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* CONTENEUR CENTRAL */
+body > * {
+    background: white;
+    padding: 40px 60px;
+    border-radius: 16px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+    text-align: center;
+}
+
+/* TITRES */
+h1 {
+    font-size: 38px;
+    margin-bottom: 20px;
+    color: #2b5876;
+}
+
+/* TEXTE */
+p {
+    font-size: 18px;
+    color: #555;
+}
+
+/* LIENS = boutons */
+a {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 12px 22px;
+    text-decoration: none;
+    color: white;
+    background: linear-gradient(90deg,#2b5876,#4e4376);
+    border-radius: 8px;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+a:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+}
