@@ -57,7 +57,6 @@ def home():
         <a href="/about">Aller vers la page À propos</a>
         <a href="/project">Aller vers la page Projet</a>
         <a href="/map">Aller vers la carte</a>
-        <a href="/photo">Voir mes photos</a>
     </div>
     """
 
@@ -81,13 +80,20 @@ def project():
 def map():
     return render_template("map.html")
 
-
-
 @app.route('/photo')
 def photo():
     return render_template("photo.html")
 
-
+@app.route('/')
+def home():
+    return style + """
+    <h1>Bienvenue sur ma page d'accueil !</h1>
+    <div style="display: flex; flex-direction: column;">
+        <a href="/about">Aller vers la page À propos</a>
+        <a href="/project">Aller vers la page Projet</a>
+        <a href="/map">Aller vers la carte</a>
+        <a href="/photo">Voir mes photos</a>  </div>
+    """
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)

@@ -81,8 +81,6 @@ def project():
 def map():
     return render_template("map.html")
 
-
-
 @app.route('/photo')
 def photo():
     return render_template("photo.html")

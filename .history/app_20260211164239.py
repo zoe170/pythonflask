@@ -79,8 +79,11 @@ def project():
 
 @app.route('/map')
 def map():
-    return render_template("map.html")
-
+    return style + """
+    <h1>Page Projet</h1>
+    <p>Bienvenue sur ma page projet !</p>
+    <a href="/">Retour à l'accueil</a>
+    """
 
 
 @app.route('/photo')

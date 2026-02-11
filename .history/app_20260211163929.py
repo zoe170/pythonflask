@@ -83,11 +83,6 @@ def map():
 
 
 
-@app.route('/photo')
-def photo():
-    return render_template("photo.html")
-
-
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)

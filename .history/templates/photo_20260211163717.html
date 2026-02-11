@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Ma Galerie Photo</title>
+</head>
+<body>
+    <h1>Ma Galerie Photo</h1>
+    
+    <div class="photo-container">
+        <img src="{{ url_for('static', filename='image/mon_image.jpg') }}" alt="Ma photo" style="max-width: 500px; border-radius: 8px;">
+    </div>
+
+    <br>
+    <a href="/">Retour à l'accueil</a>
+</body>
+</html>
