@@ -1,5 +1,4 @@
-import os
-from flask import Flask, render_template, request, send_from_directory
+from flask import Flask, render_template, request, sens_from
 
 app = Flask(__name__)
 
@@ -84,27 +83,12 @@ def map():
 
 
 
-@app.route('/photo', methods=['GET', 'POST'])
+@app.route('/photo')
 def photo():
-    images = []
-    dossier_choisi = request.form.get('chemin_dossier', '')
-    photo_selectionnee = request.form.get('menu_photos', '')
+    # On se contente d'afficher la page photo.html
+    return render_template("photo.html")
 
-    # Si on a un dossier, on liste les images pour le menu déroulant
-    if dossier_choisi and os.path.exists(dossier_choisi):
-        images = [f for f in os.listdir(dossier_choisi) 
-                  if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))]
 
-    return render_template("photo.html", 
-                           images=images, 
-                           dossier=dossier_choisi, 
-                           photo_finale=photo_selectionnee)
-
-# Route pour lire l'image sur le disque dur
-@app.route('/image_externe/<path:filename>')
-def image_externe(filename):
-    directory = request.args.get('dir')
-    return send_from_directory(directory, filename)
 
 
 

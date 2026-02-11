@@ -1,5 +1,4 @@
-import os
-from flask import Flask, render_template, request, send_from_directory
+from flask import Flask, render_template
 
 app = Flask(__name__)
 
@@ -84,28 +83,39 @@ def map():
 
 
 
+@app.route('/picture')
+def picture():
+    # On se contente d'afficher la page photo.html
+    return render_template("photo.html")
+
+
+import os
+from flask import Flask, render_template, request, send_from_directory
+
+# ... (garder le début de ton app.py)
+
 @app.route('/photo', methods=['GET', 'POST'])
 def photo():
     images = []
-    dossier_choisi = request.form.get('chemin_dossier', '')
-    photo_selectionnee = request.form.get('menu_photos', '')
+    if request.method == 'POST':
+        # On récupère le chemin tapé par l'utilisateur
+        chemin = request.form.get('chemin_dossier')
+        
+        if os.path.exists(chemin):
+            # On liste les fichiers images dans ce dossier
+            images = [f for f in os.listdir(chemin) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+            # On stocke le chemin pour que le HTML sache où chercher
+            return render_template("photo.html", images=images, dossier_source=chemin)
+    
+    return render_template("photo.html", images=images)
 
-    # Si on a un dossier, on liste les images pour le menu déroulant
-    if dossier_choisi and os.path.exists(dossier_choisi):
-        images = [f for f in os.listdir(dossier_choisi) 
-                  if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))]
-
-    return render_template("photo.html", 
-                           images=images, 
-                           dossier=dossier_choisi, 
-                           photo_finale=photo_selectionnee)
-
-# Route pour lire l'image sur le disque dur
+# Cette route permet à Flask d'aller lire l'image sur ton disque dur
 @app.route('/image_externe/<path:filename>')
 def image_externe(filename):
+    # On récupère le dossier via un argument ou une variable globale (pour le test)
+    # Attention: c'est une méthode simplifiée pour ton apprentissage
     directory = request.args.get('dir')
     return send_from_directory(directory, filename)
-
 
 
 if __name__ == '__main__':

@@ -1,0 +1,71 @@
+<!-- 
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Ajouter une photo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Choisir une photo</h1>
+    
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <form action="/photo" method="post" enctype="multipart/form-data">
+            <label for="file-upload" style="cursor: pointer; display: block; margin-bottom: 10px;">
+                Sélectionnez une image sur votre PC :
+            </label>
+            <input type="file" id="file-upload" name="file" accept="image/*">
+            
+            <br><br>
+            
+            <button type="submit" style="background-color: #1877f2; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer;">
+                Envoyer la photo
+            </button>
+        </form>
+    </div>
+
+    <br>
+    <a href="/" style="color: #424270;">Retour à l'accueil</a>
+</body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Choisir un chemin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Entrez le chemin du dossier</h1>
+    
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <form action="/photo" method="POST">
+            <label>Chemin complet du répertoire :</label><br>
+            <input type="text" name="chemin_dossier" placeholder="Ex: C:\Users\Nom\Downloads" style="width: 300px; padding: 10px; margin: 10px 0;">
+            <br>
+            <button type="submit" style="background-color: #1877f2; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                Afficher les images
+            </button>
+        </form>
+    </div>
+
+    <hr>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+        {% if images %}
+            {% for img in images %}
+                <div style="text-align: center;">
+                    <p style="font-size: 10px;">{{ img }}</p>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <br>
+    <a href="/">Retour à l'accueil</a>
+</body>
+</html>
