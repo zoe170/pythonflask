@@ -120,8 +120,6 @@ import numpy as np
 from flask import Flask, render_template, request, send_from_directory
 from sklearn.cluster import KMeans
 from PIL import Image
-import io
-
 
 app = Flask(__name__)
 
