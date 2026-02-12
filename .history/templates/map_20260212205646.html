@@ -1,0 +1,132 @@
+<!-- <!DOCTYPE html>
+<html>
+
+<head>
+    <title>Carte de localisation</title>
+    <meta charset="utf-8" />
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="map"></div>
+
+    <a href="/" class="btn-retour">Retour à l'accueil</a>
+
+    <script>
+        // Création de la carte centrée sur une position
+        var map = L.map('map').setView([50.75, 2.30], 9);
+
+        // Ajout des tuiles OpenStreetMap
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Ajout des marqueurs
+        L.marker([50.372734, 3.5213837]).addTo(map).bindPopup('Rubika (Valenciennes)');;
+        L.marker([50.952, 1.881]).addTo(map).bindPopup('ULCO - FCU de Calais');
+        L.marker([50.86517, 1.86847]).addTo(map).bindPopup('Collège les 4 vents (Guînes)');
+    </script>
+
+</body>
+
+</html> -->
+
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <title>Carte de localisation</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        /* Reset et base */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* La carte prend tout l'écran */
+        #map {
+            height: 100vh;
+            width: 100%;
+            z-index: 1;
+        }
+
+        /* Style du bouton "Retour" */
+        .btn-retour {
+            position: absolute;
+            top: 20px;
+            left: 60px; /* Décalé pour ne pas cacher les contrôles de zoom Leaflet */
+            z-index: 1000;
+            background-color: white;
+            color: #333;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            border: 1px solid #ccc;
+        }
+
+        .btn-retour:hover {
+            background-color: #f8f8f8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            color: #007bff;
+        }
+
+        /* Personnalisation des popups Leaflet */
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+            padding: 5px;
+        }
+        
+        .leaflet-popup-content {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+
+<body>
+
+    <a href="/" class="btn-retour">← Retour à l'accueil</a>
+
+    <div id="map"></div>
+
+    <script>
+        // Création de la carte
+        var map = L.map('map').setView([50.75, 2.30], 9);
+
+        // Ajout des tuiles avec un style clair
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Ajout des marqueurs
+        L.marker([50.372734, 3.5213837]).addTo(map).bindPopup('<b>Rubika</b><br>Valenciennes');
+        L.marker([50.952, 1.881]).addTo(map).bindPopup('<b>ULCO</b><br>FCU de Calais');
+        L.marker([50.86517, 1.86847]).addTo(map).bindPopup('<b>Collège les 4 vents</b><br>Guînes');
+    </script>
+
+</body>
+
+</html>

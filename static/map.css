@@ -1,0 +1,68 @@
+        /* Fond de page légèrement grisé pour faire ressortir l'encadré */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f4f7f6;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        /* Conteneur principal (l'encadré) */
+        .map-container {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 900px;
+            border: 1px solid #e0e0e0;
+        }
+
+        /* Titre au-dessus de la carte */
+        .map-header {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .map-header h2 {
+            margin: 0;
+            color: #2d3436;
+            font-size: 1.2rem;
+        }
+
+        /* La zone de la carte */
+        #map {
+            height: 500px;
+            width: 100%;
+            border-radius: 10px; /* Arrondi des coins de la map elle-même */
+            z-index: 1;
+        }
+
+        /* Style du bouton retour */
+        .btn-retour {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #424270;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .btn-retour:hover {
+            background-color: #424270;
+        }
+
+        /* Responsive : ajuster la hauteur sur mobile */
+        @media (max-width: 600px) {
+            #map { height: 350px; }
+            .map-container { padding: 10px; }
+        }
