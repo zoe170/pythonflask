@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>IA Galerie - Hiérarchique</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Clustering Hiérarchique (CHA)</h1>
+    <p>Cette méthode regroupe les pixels en créant une hiérarchie de ressemblances.</p>
+
+    <div class="card">
+        <h3>1. Dossier source</h3>
+        <form method="POST" action="/hierarchical">
+            <input type="text" name="chemin_dossier" value="{{ dossier }}" placeholder="Chemin du dossier">
+            <button type="submit">Charger</button>
+        </form>
+    </div>
+
+    {% if images %}
+    <div class="card">
+        <h3>2. Sélection</h3>
+        <form method="POST" action="/hierarchical">
+            <input type="hidden" name="chemin_dossier" value="{{ dossier }}">
+            <select name="menu_photos" onchange="this.form.submit()">
+                <option value="">-- Choisir une image --</option>
+                {% for img in images %}
+                <option value="{{ img }}" {% if img == photo_finale %}selected{% endif %}>{{ img }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if photo_finale %}
+    <div class="card" style="text-align: center;">
+        <img src="{{ url_for('image_externe', filename=photo_finale, dir=dossier) }}" style="max-width: 300px;">
+        <h4>Lancer le Clustering Hiérarchique</h4>
+        <form action="/process_hc" method="POST">
+            <input type="hidden" name="dossier" value="{{ dossier }}">
+            <input type="hidden" name="photo" value="{{ photo_finale }}">
+            <label>Nombre de groupes (K) :</label>
+            <input type="number" name="k" value="5" min="2" max="15">
+            <button type="submit" style="background-color: #1877f2;">Calculer (lent)</button>
+        </form>
+    </div>
+    {% endif %}
+    <br>
+    <a href="/" class="btn-home">Retour à l'accueil</a>
+</body>
+</html>

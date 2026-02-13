@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>IA Galerie - K-Means</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
 </head>
 <body>
 
@@ -13,6 +13,7 @@
     <div class="card">
         <h3>1. Choisir le répertoire</h3>
         <form method="POST" action="/photo">
+            <!-- entre le chemin d'un dossier de son ordinateur. -->
             <input type="text" name="chemin_dossier" value="{{ dossier }}" placeholder="Ex: C:\Users\Nom\Pictures">
             <button type="submit">Charger les images</button>
         </form>
@@ -25,6 +26,7 @@
             <input type="hidden" name="chemin_dossier" value="{{ dossier }}">
             <select name="menu_photos" onchange="this.form.submit()">
                 <option value="">-- Choisissez une image --</option>
+                <!-- créer une liste déroulante -->
                 {% for img in images %}
                 <option value="{{ img }}" {% if img == photo_finale or photo_finale == 'kmeans_' ~ img %}selected{% endif %}>
                     {{ img }}
