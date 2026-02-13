@@ -31,30 +31,6 @@ def home():
     </div>
     """
 
-# --- ROUTES DES PAGES STATIQUES ---
-
-@app.route('/map')
-def map_page():
-    return render_template('map.html')
-
-@app.route('/about')
-def about():
-    # Retourne une structure simple pour la page À propos
-    return style + """
-    <h1>À propos</h1>
-    <div class="card" style="background:white; padding:20px; border-radius:8px; max-width:500px; line-height:1.6;">
-        <p>Ce projet explore différentes méthodes de <strong>Clustering</strong> appliquées à la segmentation d'image :</p>
-        <ul>
-            <li><strong>K-Means :</strong> Partitionnement rapide par centroïdes.</li>
-            <li><strong>CHA :</strong> Regroupement hiérarchique (Ward).</li>
-            <li><strong>DBSCAN :</strong> Détection par densité et gestion du bruit.</li>
-        </ul>
-        <a href="/" style="display:block; margin-top:15px;">Retour</a>
-    </div>
-    """
-
-# --- LOGIQUE DE GALERIE ET CLUSTERING ---
-
 @app.route('/photo', methods=['GET', 'POST'])
 def photo(): return handle_gallery("photo.html")
 

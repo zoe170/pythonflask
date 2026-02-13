@@ -1,0 +1,236 @@
+<!-- <!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>IA Galerie - DBSCAN</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .comparison-container { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin: 20px 0; }
+        .image-box { flex: 1; min-width: 250px; text-align: center; background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .image-box img { max-width: 100%; border-radius: 5px; border: 1px solid #ddd; }
+        .result-box img { border: 2px solid #e91e63; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; width: 100%; max-width: 800px; }
+        .stats-panel { border: 1px solid #e91e63; border-radius: 8px; overflow: hidden; margin-bottom: 20px; }
+        .stats-header { background: #e91e63; color: white; padding: 10px; font-weight: bold; }
+        .stats-body { padding: 15px; display: flex; justify-content: space-around; background: #fff5f8; }
+        .stat-item { text-align: center; }
+        .stat-value { display: block; font-size: 1.8em; font-weight: bold; color: #ad1457; }
+        body { display: flex; flex-direction: column; align-items: center; background-color: #f0f2f5; padding: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Segmentation par Densité (DBSCAN)</h1>
+
+    <div class="card">
+        <h3>1. Dossier source</h3>
+        <form method="POST" action="/dbscan">
+            <input type="text" name="chemin_dossier" value="{{ dossier }}" placeholder="Ex: C:\Users\Images">
+            <button type="submit">Charger</button>
+        </form>
+    </div>
+
+    {% if images %}
+    <div class="card">
+        <h3>2. Sélection de l'image</h3>
+        <form method="POST" action="/dbscan">
+            <input type="hidden" name="chemin_dossier" value="{{ dossier }}">
+            <select name="menu_photos" onchange="this.form.submit()">
+                <option value="">-- Choisir une photo --</option>
+                {% for img in images %}
+                <option value="{{ img }}" {% if photo_finale.endswith(img) %}selected{% endif %}>{{ img }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if photo_finale %}
+    <div class="card">
+        <h3>3. Analyse des résultats</h3>
+        
+        {% if stats %}
+        <div class="stats-panel">
+            <div class="stats-header">Rapport de segmentation</div>
+            <div class="stats-body">
+                <div class="stat-item">
+                    <span class="stat-value">{{ stats.k_found }}</span>
+                    <span>Nombre de groupes (K)</span>
+                </div>
+                <div style="border-left: 1px solid #ddd;"></div>
+                <div class="stat-item">
+                    <span class="stat-value">{{ stats.noise_points }}</span>
+                    <span>Points non-étiquetés (Bruit)</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">{{ stats.noise_pct }}%</span>
+                    <span>Surface rejetée</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="comparison-container">
+            <div class="image-box">
+                <p><strong>Originale</strong></p>
+                {% set photo_origine = photo_finale.split('_')[-1] %}
+                <img src="{{ url_for('image_externe', filename=photo_origine, dir=dossier) }}">
+            </div>
+            <div class="image-box result-box">
+                <p><strong>DBSCAN</strong></p>
+                <img src="{{ url_for('image_externe', filename=photo_finale, dir=dossier) }}">
+            </div>
+        </div>
+
+        <hr>
+
+        <h4>Paramètres du scan</h4>
+        <form action="/process_dbscan" method="POST">
+            <input type="hidden" name="dossier" value="{{ dossier }}">
+            <input type="hidden" name="photo" value="{{ photo_finale.split('_')[-1] }}">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                <div>
+                    <label>Epsilon (Sensibilité) :</label>
+                    <input type="number" name="eps" value="5" min="1" max="50" step="0.5" style="width: 100%;">
+                </div>
+                <div>
+                    <label>Min Samples (Densité) :</label>
+                    <input type="number" name="min_samples" value="10" min="1" max="100" style="width: 100%;">
+                </div>
+            </div>
+            <button type="submit" style="background-color: #e91e63; width: 100%;">Recalculer</button>
+        </form>
+    </div>
+    {% endif %}
+
+    <br>
+    <a href="/" style="background-color: #424270; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none;">Retour à l'accueil</a>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>IA Galerie - DBSCAN</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;500&display=swap');
+        body { font-family: 'Poppins', sans-serif; display: flex; flex-direction: column; align-items: center; background-color: #f0f2f5; padding: 20px; margin: 0; }
+        .comparison-container { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin: 20px 0; }
+        .image-box { flex: 1; min-width: 250px; text-align: center; background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .image-box img { max-width: 100%; border-radius: 5px; border: 1px solid #ddd; }
+        .result-box img { border: 2px solid #e91e63; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; width: 100%; max-width: 800px; box-sizing: border-box; }
+        .stats-panel { border: 1px solid #e91e63; border-radius: 8px; overflow: hidden; margin-bottom: 20px; }
+        .stats-header { background: #e91e63; color: white; padding: 10px; font-weight: bold; text-align: center; }
+        .stats-body { padding: 15px; display: flex; justify-content: space-around; background: #fff5f8; align-items: center; }
+        .stat-item { text-align: center; flex: 1; }
+        .stat-value { display: block; font-size: 1.8em; font-weight: bold; color: #ad1457; }
+        
+        /* Styles pour le menu des couleurs */
+        .color-selector { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ddd; margin-top: 10px; font-family: inherit; }
+        .color-dot { width: 20px; height: 20px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); display: inline-block; }
+        .palette { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; padding: 10px; background: #f9f9f9; border-radius: 6px; }
+    </style>
+</head>
+<body>
+    <h1>Segmentation par Densité (DBSCAN)</h1>
+
+    <div class="card">
+        <h3>1. Dossier source</h3>
+        <form method="POST" action="/dbscan" style="display: flex; gap: 10px;">
+            <input type="text" name="chemin_dossier" value="{{ dossier }}" placeholder="Ex: C:\Users\Images" style="flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #ddd;">
+            <button type="submit" style="background: #424270; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">Charger</button>
+        </form>
+    </div>
+
+    {% if images %}
+    <div class="card">
+        <h3>2. Sélection de l'image</h3>
+        <form method="POST" action="/dbscan">
+            <input type="hidden" name="chemin_dossier" value="{{ dossier }}">
+            <select name="menu_photos" onchange="this.form.submit()" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ddd;">
+                <option value="">-- Choisir une photo --</option>
+                {% for img in images %}
+                <option value="{{ img }}" {% if photo_finale and photo_finale.endswith(img) %}selected{% endif %}>{{ img }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if photo_finale %}
+    <div class="card">
+        <h3>3. Analyse des résultats</h3>
+        
+        {% if stats %}
+        <div class="stats-panel">
+            <div class="stats-header">Rapport de segmentation</div>
+            <div class="stats-body">
+                <div class="stat-item">
+                    <span class="stat-value">{{ stats.k_found }}</span>
+                    <span>Classes trouvées</span>
+                </div>
+                <div style="width: 1px; height: 40px; background: #ddd;"></div>
+                <div class="stat-item">
+                    <span class="stat-value">{{ stats.noise_pct }}%</span>
+                    <span>Bruit (Points isolés)</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 25px;">
+            <label><strong>Palette de couleurs détectées :</strong></label>
+            <select class="color-selector">
+                <option>-- Liste des {{ stats.k_found }} couleurs moyennes --</option>
+                {% for hex in stats.colors %}
+                <option style="background-color: {{ hex }}; color: {{ '#ffffff' if hex < '#888888' else '#000000' }};">
+                    Classe {{ loop.index }} : {{ hex }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <div class="palette">
+                {% for hex in stats.colors %}
+                <div class="color-dot" style="background-color: {{ hex }};" title="Classe {{ loop.index }} : {{ hex }}"></div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="comparison-container">
+            <div class="image-box">
+                <p><strong>Originale</strong></p>
+                {% set photo_origine = photo_finale.split('_')[-1] %}
+                <img src="{{ url_for('image_externe', filename=photo_origine, dir=dossier) }}">
+            </div>
+            <div class="image-box result-box">
+                <p><strong>Résultat DBSCAN</strong></p>
+                <img src="{{ url_for('image_externe', filename=photo_finale, dir=dossier) }}">
+            </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+        <h4>Ajuster les paramètres</h4>
+        <form action="/process_dbscan" method="POST">
+            <input type="hidden" name="dossier" value="{{ dossier }}">
+            <input type="hidden" name="photo" value="{{ photo_finale.split('_')[-1] }}">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                <div>
+                    <label style="font-size: 0.9em;">Epsilon (Sensibilité) :</label>
+                    <input type="number" name="eps" value="5" min="1" max="50" step="0.5" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                </div>
+                <div>
+                    <label style="font-size: 0.9em;">Min Samples (Densité) :</label>
+                    <input type="number" name="min_samples" value="10" min="1" max="100" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                </div>
+            </div>
+            <button type="submit" style="background-color: #e91e63; color: white; border: none; width: 100%; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">Recalculer la segmentation</button>
+        </form>
+    </div>
+    {% endif %}
+
+    <br>
+    <a href="/" style="background-color: #424270; color: white; padding: 12px 25px; border-radius: 6px; text-decoration: none; font-weight: bold;">Retour à l'accueil</a>
+</body>
+</html>

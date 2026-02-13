@@ -6,7 +6,7 @@ from PIL import Image
 
 app = Flask(__name__)
 
-# Style CSS centralisé pour la page d'accueil
+# Style CSS centralisé
 style = """
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;500&display=swap');
@@ -30,30 +30,6 @@ def home():
         <a href="/about">À propos</a>
     </div>
     """
-
-# --- ROUTES DES PAGES STATIQUES ---
-
-@app.route('/map')
-def map_page():
-    return render_template('map.html')
-
-@app.route('/about')
-def about():
-    # Retourne une structure simple pour la page À propos
-    return style + """
-    <h1>À propos</h1>
-    <div class="card" style="background:white; padding:20px; border-radius:8px; max-width:500px; line-height:1.6;">
-        <p>Ce projet explore différentes méthodes de <strong>Clustering</strong> appliquées à la segmentation d'image :</p>
-        <ul>
-            <li><strong>K-Means :</strong> Partitionnement rapide par centroïdes.</li>
-            <li><strong>CHA :</strong> Regroupement hiérarchique (Ward).</li>
-            <li><strong>DBSCAN :</strong> Détection par densité et gestion du bruit.</li>
-        </ul>
-        <a href="/" style="display:block; margin-top:15px;">Retour</a>
-    </div>
-    """
-
-# --- LOGIQUE DE GALERIE ET CLUSTERING ---
 
 @app.route('/photo', methods=['GET', 'POST'])
 def photo(): return handle_gallery("photo.html")
@@ -123,28 +99,22 @@ def run_clustering(method):
         unique_labels = set(labels)
         
         n_clusters = len([l for l in unique_labels if l != -1])
-        n_noise = list(labels).count(-1)
+        n_noise = list(labels).count(-1) # Nombre de points non étiquetés
         pct_noise = round((n_noise / len(labels)) * 100, 1)
-        
-        detected_colors = []
-        new_pixels = np.zeros_like(pixels)
-        
-        for label in sorted(unique_labels):
-            mask = (labels == label)
-            if label == -1:
-                new_pixels[mask] = [0, 0, 0] # Bruit en noir
-            else:
-                mean_col = pixels[mask].mean(axis=0).astype('uint8')
-                new_pixels[mask] = mean_col
-                hex_col = '#{:02x}{:02x}{:02x}'.format(mean_col[0], mean_col[1], mean_col[2])
-                detected_colors.append(hex_col)
         
         stats = {
             "k_found": n_clusters, 
             "noise_points": n_noise,
-            "noise_pct": pct_noise,
-            "colors": detected_colors
+            "noise_pct": pct_noise
         }
+
+        new_pixels = np.zeros_like(pixels)
+        for label in unique_labels:
+            if label == -1:
+                new_pixels[labels == label] = [0, 0, 0]
+            else:
+                mean_col = pixels[labels == label].mean(axis=0)
+                new_pixels[labels == label] = mean_col.astype('uint8')
         suffix = f"dbscan_{eps}"
 
     new_img_np = new_pixels.reshape(img_np.shape)
