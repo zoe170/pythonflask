@@ -1,0 +1,160 @@
+<!-- <!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>IA Galerie - Hiérarchique</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .comparison-container { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin: 20px 0; }
+        .image-box { flex: 1; min-width: 250px; text-align: center; background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .image-box img { max-width: 100%; border-radius: 5px; border: 1px solid #ddd; }
+        .result-box img { border: 2px solid #1877f2; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; width: 100%; max-width: 800px; }
+        body { display: flex; flex-direction: column; align-items: center; background-color: #f0f2f5; padding: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Clustering Hiérarchique (CHA)</h1>
+    <p>Cette méthode regroupe les pixels en créant un arbre de ressemblances.</p>
+
+    <div class="card">
+        <h3>1. Dossier source</h3>
+        <form method="POST" action="/hierarchical">
+            <input type="text" name="chemin_dossier" value="{{ dossier }}" placeholder="Ex: C:\Users\Images">
+            <button type="submit">Charger</button>
+        </form>
+    </div>
+
+    {% if images %}
+    <div class="card">
+        <h3>2. Sélection de l'image</h3>
+        <form method="POST" action="/hierarchical">
+            <input type="hidden" name="chemin_dossier" value="{{ dossier }}">
+            <select name="menu_photos" onchange="this.form.submit()">
+                <option value="">-- Choisir une photo --</option>
+                {% for img in images %}
+                <option value="{{ img }}" {% if photo_finale.endswith(img) %}selected{% endif %}>{{ img }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if photo_finale %}
+    <div class="card">
+        <h3>3. Comparaison Avant / Après</h3>
+        
+        <div class="comparison-container">
+            <div class="image-box">
+                <p><strong>Originale</strong></p>
+                {% set photo_origine = photo_finale.split('_')[-1] %}
+                <img src="{{ url_for('image_externe', filename=photo_origine, dir=dossier) }}">
+            </div>
+
+            <div class="image-box result-box">
+                <p><strong>Après Clustering</strong></p>
+                <img src="{{ url_for('image_externe', filename=photo_finale, dir=dossier) }}">
+            </div>
+        </div>
+
+        <hr>
+
+        <h4>Lancer l'algorithme</h4>
+        <form action="/process_hc" method="POST">
+            <input type="hidden" name="dossier" value="{{ dossier }}">
+            <input type="hidden" name="photo" value="{{ photo_finale.split('_')[-1] }}">
+            <div style="margin-bottom: 15px;">
+                <label>Nombre de groupes (K) :</label>
+                <input type="number" name="k" value="5" min="2" max="15" style="width: 200px;">
+            </div>
+            <button type="submit" style="background-color: #1877f2; width: 100%;">Calculer la hiérarchie</button>
+        </form>
+    </div>
+    {% endif %}
+
+    <br>
+    <a href="/" class="btn-home" style="background-color: #424270; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none;">Retour à l'accueil</a>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>IA Galerie - Hiérarchique</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .comparison-container { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin: 20px 0; }
+        .image-box { flex: 1; min-width: 250px; text-align: center; background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .image-box img { width: 100%; height: auto; border-radius: 5px; border: 1px solid #ddd; object-fit: contain; }
+        .result-box img { border: 2px solid #1877f2; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; width: 100%; max-width: 800px; }
+        body { display: flex; flex-direction: column; align-items: center; background-color: #f0f2f5; padding: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Clustering Hiérarchique (CHA)</h1>
+    <p>Cette méthode regroupe les pixels en créant un arbre de ressemblances.</p>
+
+    <div class="card">
+        <h3>1. Dossier source</h3>
+        <form method="POST" action="/hierarchical">
+            <input type="text" name="chemin_dossier" value="{{ dossier }}" placeholder="Ex: C:\Users\Images">
+            <button type="submit">Charger</button>
+        </form>
+    </div>
+
+    {% if images %}
+    <div class="card">
+        <h3>2. Sélection de l'image</h3>
+        <form method="POST" action="/hierarchical">
+            <input type="hidden" name="chemin_dossier" value="{{ dossier }}">
+            <select name="menu_photos" onchange="this.form.submit()">
+                <option value="">-- Choisir une photo --</option>
+                {% for img in images %}
+                <option value="{{ img }}" {% if img == photo_finale %}selected{% endif %}>{{ img }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if photo_finale %}
+    <div class="card">
+        <h3>3. Comparaison Avant / Après</h3>
+        
+        <div class="comparison-container">
+            <div class="image-box">
+                <p><strong>Originale</strong></p>
+                <img src="{{ url_for('image_externe', filename=photo_finale, dir=dossier) }}">
+            </div>
+
+            <div class="image-box result-box">
+                <p><strong>Après Clustering</strong></p>
+                {% if result_image %}
+                    <img src="{{ result_image }}">
+                {% else %}
+                    <div style="border: 1px dashed #ccc; padding: 50px; border-radius: 8px;">Lancer le traitement...</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <hr>
+
+        <h4>Lancer l'algorithme</h4>
+        <form action="/process_hc" method="POST">
+            <input type="hidden" name="dossier" value="{{ dossier }}">
+            <input type="hidden" name="photo" value="{{ photo_finale }}">
+            <div style="margin-bottom: 15px;">
+                <label>Nombre de groupes (K) :</label>
+                <input type="number" name="k" value="5" min="2" max="15" style="width: 200px;">
+            </div>
+            <button type="submit" style="background-color: #1877f2; width: 100%;">Calculer la hiérarchie (Lent)</button>
+        </form>
+    </div>
+    {% endif %}
+
+    <br>
+    <a href="/" class="btn-home" style="background-color: #424270; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none;">Retour à l'accueil</a>
+</body>
+</html>

@@ -1,5 +1,3 @@
-
-
 import os
 import numpy as np
 from flask import Flask, render_template, request, send_from_directory
@@ -83,13 +81,12 @@ def run_clustering(method):
     """Exécute l'algorithme choisi sur l'image d'origine."""
     dossier = request.form.get('dossier')
     photo = request.form.get('photo')
-    stats = None
     
     # 1. Chargement de l'image originale
     path_input = os.path.join(dossier, photo)
     img = Image.open(path_input).convert('RGB')
     
-    # 2. Paramètres et Redimensionnement
+    # 2. Paramètres et Redimensionnement selon la méthode
     if method == "kmeans":
         k = int(request.form.get('k', 5))
         limit = 400
@@ -99,7 +96,7 @@ def run_clustering(method):
     else: # dbscan
         eps = float(request.form.get('eps', 5))
         min_samples = int(request.form.get('min_samples', 10))
-        limit = 150 # Réduction pour performance
+        limit = 150 # DBSCAN est très lourd, on limite la taille
 
     img_small = img.copy()
     img_small.thumbnail((limit, limit))
@@ -124,13 +121,8 @@ def run_clustering(method):
     elif method == "dbscan":
         model = DBSCAN(eps=eps, min_samples=min_samples)
         labels = model.fit_predict(pixels)
-        
+        # Gestion des couleurs pour DBSCAN (incluant le bruit label -1)
         unique_labels = set(labels)
-        n_clusters = len([l for l in unique_labels if l != -1])
-        n_noise = list(labels).count(-1)
-        pct_noise = round((n_noise / len(labels)) * 100, 1)
-        stats = {"clusters": n_clusters, "noise": pct_noise}
-
         new_pixels = np.zeros_like(pixels)
         for label in unique_labels:
             if label == -1:
@@ -140,7 +132,7 @@ def run_clustering(method):
                 new_pixels[labels == label] = mean_col.astype('uint8')
         suffix = f"dbscan_{eps}"
 
-    # 4. Reconstruction
+    # 4. Reconstruction et Redimensionnement final
     new_img_np = new_pixels.reshape(img_np.shape)
     result_img = Image.fromarray(new_img_np)
     result_img = result_img.resize(img.size, Image.NEAREST)
@@ -148,10 +140,10 @@ def run_clustering(method):
     result_name = f"{suffix}_{photo}"
     result_img.save(os.path.join(dossier, result_name))
     
-    # 5. Retour
+    # 5. Retour vers la page correspondante
     images = [f for f in os.listdir(dossier) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
     templates = {"kmeans": "photo.html", "hc": "hierarchical.html", "dbscan": "dbscan.html"}
-    return render_template(templates[method], images=images, dossier=dossier, photo_finale=result_name, stats=stats)
+    return render_template(templates[method], images=images, dossier=dossier, photo_finale=result_name)
 
 @app.route('/image_externe/<path:filename>')
 def image_externe(filename):
@@ -159,4 +151,5 @@ def image_externe(filename):
     return send_from_directory(directory, filename)
 
 if __name__ == '__main__':
+    # Changement de port à 5001 pour éviter les conflits
     app.run(debug=True, port=5001)

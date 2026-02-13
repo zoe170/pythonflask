@@ -1,10 +1,10 @@
 
-
 import os
 import numpy as np
 from flask import Flask, render_template, request, send_from_directory
-from sklearn.cluster import KMeans, AgglomerativeClustering, DBSCAN
+from sklearn.cluster import KMeans, AgglomerativeClustering
 from PIL import Image
+from sklearn.cluster import KMeans, AgglomerativeClustering, DBSCAN
 
 app = Flask(__name__)
 
@@ -22,13 +22,12 @@ style = """
 
 @app.route('/')
 def home():
-    """Page d'accueil avec navigation vers les trois types de segmentation."""
+    """Page d'accueil avec navigation vers les deux types de segmentation."""
     return style + """
     <h1>Ma Plateforme IA</h1>
     <div class="container">
         <a href="/photo">Segmentation K-Means (Rapide)</a>
         <a href="/hierarchical">Segmentation Hiérarchique (Précis)</a>
-        <a href="/dbscan">Segmentation par Densité (DBSCAN)</a>
         <a href="/map">Mon Parcours (Carte)</a>
         <a href="/about">À propos</a>
     </div>
@@ -36,7 +35,7 @@ def home():
 
 @app.route('/about')
 def about():
-    return style + '<h1>À propos</h1><p>Comparaison entre K-Means, Clustering Hiérarchique et DBSCAN.</p><a href="/">Retour</a>'
+    return style + '<h1>À propos</h1><p>Comparaison entre K-Means et Clustering Hiérarchique.</p><a href="/">Retour</a>'
 
 @app.route('/map')
 def map():
@@ -51,10 +50,6 @@ def photo():
 @app.route('/hierarchical', methods=['GET', 'POST'])
 def hierarchical():
     return handle_gallery("hierarchical.html")
-
-@app.route('/dbscan', methods=['GET', 'POST'])
-def dbscan():
-    return handle_gallery("dbscan.html")
 
 def handle_gallery(template_name):
     """Gère l'affichage du dossier et de la photo sélectionnée."""
@@ -75,83 +70,55 @@ def process_kmeans():
 def process_hc():
     return run_clustering("hc")
 
-@app.route('/process_dbscan', methods=['POST'])
-def process_dbscan():
-    return run_clustering("dbscan")
-
 def run_clustering(method):
     """Exécute l'algorithme choisi sur l'image d'origine."""
     dossier = request.form.get('dossier')
     photo = request.form.get('photo')
-    stats = None
+    k = int(request.form.get('k', 5))
     
     # 1. Chargement de l'image originale
     path_input = os.path.join(dossier, photo)
     img = Image.open(path_input).convert('RGB')
     
-    # 2. Paramètres et Redimensionnement
-    if method == "kmeans":
-        k = int(request.form.get('k', 5))
-        limit = 400
-    elif method == "hc":
-        k = int(request.form.get('k', 5))
-        limit = 100
-    else: # dbscan
-        eps = float(request.form.get('eps', 5))
-        min_samples = int(request.form.get('min_samples', 10))
-        limit = 150 # Réduction pour performance
-
+    # 2. Redimensionnement temporaire pour la performance
+    limit = 100 if method == "hc" else 400
     img_small = img.copy()
     img_small.thumbnail((limit, limit))
+    
+    # 3. Préparation des données
     img_np = np.array(img_small)
     pixels = img_np.reshape(-1, 3)
 
-    # 3. Application de l'IA
+    # 4. Application de l'IA
     if method == "kmeans":
         model = KMeans(n_clusters=k, n_init=10, random_state=42)
         labels = model.fit_predict(pixels)
         colors = model.cluster_centers_.astype('uint8')
-        new_pixels = colors[labels]
-        suffix = f"kmeans_{k}"
-
-    elif method == "hc":
+    else:
         model = AgglomerativeClustering(n_clusters=k, linkage='ward')
         labels = model.fit_predict(pixels)
         colors = np.array([pixels[labels == i].mean(axis=0) for i in range(k)]).astype('uint8')
-        new_pixels = colors[labels]
-        suffix = f"hc_{k}"
 
-    elif method == "dbscan":
-        model = DBSCAN(eps=eps, min_samples=min_samples)
-        labels = model.fit_predict(pixels)
-        
-        unique_labels = set(labels)
-        n_clusters = len([l for l in unique_labels if l != -1])
-        n_noise = list(labels).count(-1)
-        pct_noise = round((n_noise / len(labels)) * 100, 1)
-        stats = {"clusters": n_clusters, "noise": pct_noise}
-
-        new_pixels = np.zeros_like(pixels)
-        for label in unique_labels:
-            if label == -1:
-                new_pixels[labels == label] = [0, 0, 0] # Bruit en noir
-            else:
-                mean_col = pixels[labels == label].mean(axis=0)
-                new_pixels[labels == label] = mean_col.astype('uint8')
-        suffix = f"dbscan_{eps}"
-
-    # 4. Reconstruction
+    # 5. Reconstruction et remise à la taille d'origine
+    new_pixels = colors[labels]
     new_img_np = new_pixels.reshape(img_np.shape)
+    
+    # Création de l'image segmentée à partir des pixels traités
     result_img = Image.fromarray(new_img_np)
+    
+    # Correction : Redimensionner pour correspondre à la taille de l'image de gauche (originale)
+    # L'utilisation de Image.NEAREST permet de garder les bords des couleurs nets.
     result_img = result_img.resize(img.size, Image.NEAREST)
     
-    result_name = f"{suffix}_{photo}"
+    result_name = f"{method}_{k}_{photo}"
     result_img.save(os.path.join(dossier, result_name))
+
     
-    # 5. Retour
+    
+    # 6. Retour vers la page correspondante
     images = [f for f in os.listdir(dossier) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
-    templates = {"kmeans": "photo.html", "hc": "hierarchical.html", "dbscan": "dbscan.html"}
-    return render_template(templates[method], images=images, dossier=dossier, photo_finale=result_name, stats=stats)
+    template = "photo.html" if method == "kmeans" else "hierarchical.html"
+    return render_template(template, images=images, dossier=dossier, photo_finale=result_name)
 
 @app.route('/image_externe/<path:filename>')
 def image_externe(filename):

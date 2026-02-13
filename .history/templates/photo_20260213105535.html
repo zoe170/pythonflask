@@ -1,0 +1,160 @@
+<!-- <!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>IA Galerie - Comparaison</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .comparison-container { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin: 20px 0; }
+        .image-box { flex: 1; min-width: 300px; text-align: center; }
+        .image-box img { max-width: 100%; border-radius: 8px; border: 2px solid #ddd; }
+        .image-box.result img { border-color: #1877f2; box-shadow: 0 4px 8px rgba(24, 119, 242, 0.2); }
+    </style>
+</head>
+<body>
+
+    <h1>Segmentation d'image (IA)</h1>
+
+    <div class="card">
+        <h3>1. Choisir le répertoire</h3>
+        <form method="POST">
+            <input type="text" name="chemin_dossier" value="{{ dossier }}" placeholder="Chemin du dossier">
+            <button type="submit">Charger les images</button>
+        </form>
+    </div>
+
+    {% if images %}
+    <div class="card">
+        <h3>2. Sélectionner une photo</h3>
+        <form method="POST">
+            <input type="hidden" name="chemin_dossier" value="{{ dossier }}">
+            <select name="menu_photos" onchange="this.form.submit()">
+                <option value="">-- Choisissez une image --</option>
+                {% for img in images %}
+                <option value="{{ img }}" {% if img == photo_finale or photo_finale.endswith(img) %}selected{% endif %}>
+                    {{ img }}
+                </option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if photo_finale %}
+    <div class="card" style="max-width: 900px;">
+        <h3>3. Comparaison Avant / Après</h3>
+        
+        <div class="comparison-container">
+            <div class="image-box">
+                <p><strong>Originale</strong></p>
+                {% set photo_origine = photo_finale.split('_')[-1] %}
+                <img src="{{ url_for('image_externe', filename=photo_origine, dir=dossier) }}">
+            </div>
+
+            <div class="image-box result">
+                <p><strong>Résultat IA</strong></p>
+                <img src="{{ url_for('image_externe', filename=photo_finale, dir=dossier) }}">
+            </div>
+        </div>
+
+        <hr>
+
+        <h4>Paramètres de l'IA</h4>
+        <form action="/process_kmeans" method="POST"> 
+            <input type="hidden" name="dossier" value="{{ dossier }}">
+            <input type="hidden" name="photo" value="{{ photo_finale.split('_')[-1] }}">
+            
+            <label>Nombre de couleurs (K) :</label>
+            <input type="number" name="k" value="5" min="2" max="20">
+            <button type="submit" style="background-color: #1877f2;">Lancer le traitement</button>
+        </form>
+    </div>
+    {% endif %}
+
+    <br>
+    <a href="/" class="btn-home">Retour à l'accueil</a>
+
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>IA Galerie - Comparaison</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .comparison-container { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin: 20px 0; }
+        .image-box { flex: 1; min-width: 300px; text-align: center; }
+        .image-box img { width: 100%; height: auto; border-radius: 8px; border: 2px solid #ddd; object-fit: contain; }
+        .image-box.result img { border-color: #1877f2; box-shadow: 0 4px 8px rgba(24, 119, 242, 0.2); }
+    </style>
+</head>
+<body>
+
+    <h1>Segmentation d'image (IA)</h1>
+
+    <div class="card">
+        <h3>1. Choisir le répertoire</h3>
+        <form method="POST">
+            <input type="text" name="chemin_dossier" value="{{ dossier }}" placeholder="Chemin du dossier">
+            <button type="submit">Charger les images</button>
+        </form>
+    </div>
+
+    {% if images %}
+    <div class="card">
+        <h3>2. Sélectionner une photo</h3>
+        <form method="POST">
+            <input type="hidden" name="chemin_dossier" value="{{ dossier }}">
+            <select name="menu_photos" onchange="this.form.submit()">
+                <option value="">-- Choisissez une image --</option>
+                {% for img in images %}
+                <option value="{{ img }}" {% if img == photo_finale %}selected{% endif %}>
+                    {{ img }}
+                </option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if photo_finale %}
+    <div class="card" style="max-width: 900px;">
+        <h3>3. Comparaison Avant / Après</h3>
+        
+        <div class="comparison-container">
+            <div class="image-box">
+                <p><strong>Originale</strong></p>
+                <img src="{{ url_for('image_externe', filename=photo_finale, dir=dossier) }}">
+            </div>
+
+            <div class="image-box result">
+                <p><strong>Résultat IA</strong></p>
+                {% if result_image %}
+                    <img src="{{ result_image }}">
+                {% else %}
+                    <div style="border: 1px dashed #ccc; padding: 50px; border-radius: 8px;">Lancer le traitement pour voir le résultat</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <hr>
+
+        <h4>Paramètres de l'IA</h4>
+        <form action="/process_kmeans" method="POST"> 
+            <input type="hidden" name="dossier" value="{{ dossier }}">
+            <input type="hidden" name="photo" value="{{ photo_finale }}">
+            
+            <label>Nombre de couleurs (K) :</label>
+            <input type="number" name="k" value="5" min="2" max="20">
+            <button type="submit" style="background-color: #1877f2;">Lancer le traitement</button>
+        </form>
+    </div>
+    {% endif %}
+
+    <br>
+    <a href="/" class="btn-home">Retour à l'accueil</a>
+
+</body>
+</html>

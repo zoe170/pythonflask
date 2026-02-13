@@ -2,24 +2,25 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>IA Galerie - Hiérarchique</title>
+    <title>IA Galerie - DBSCAN</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
         .comparison-container { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin: 20px 0; }
         .image-box { flex: 1; min-width: 250px; text-align: center; background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .image-box img { max-width: 100%; border-radius: 5px; border: 1px solid #ddd; }
-        .result-box img { border: 2px solid #1877f2; }
+        .result-box img { border: 2px solid #e91e63; }
         .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; width: 100%; max-width: 800px; }
+        .stats-badge { background: #fce4ec; color: #ad1457; padding: 10px; border-radius: 5px; border-left: 5px solid #e91e63; margin-top: 10px; }
         body { display: flex; flex-direction: column; align-items: center; background-color: #f0f2f5; padding: 20px; }
     </style>
 </head>
 <body>
-    <h1>Clustering Hiérarchique (CHA)</h1>
-    <p>Cette méthode regroupe les pixels en créant un arbre de ressemblances.</p>
+    <h1>Segmentation par Densité (DBSCAN)</h1>
+    <p>Cette méthode regroupe les pixels en détectant des zones de forte densité de couleur.</p>
 
     <div class="card">
         <h3>1. Dossier source</h3>
-        <form method="POST" action="/hierarchical">
+        <form method="POST" action="/dbscan">
             <input type="text" name="chemin_dossier" value="{{ dossier }}" placeholder="Ex: C:\Users\Images">
             <button type="submit">Charger</button>
         </form>
@@ -28,7 +29,7 @@
     {% if images %}
     <div class="card">
         <h3>2. Sélection de l'image</h3>
-        <form method="POST" action="/hierarchical">
+        <form method="POST" action="/dbscan">
             <input type="hidden" name="chemin_dossier" value="{{ dossier }}">
             <select name="menu_photos" onchange="this.form.submit()">
                 <option value="">-- Choisir une photo --</option>
@@ -42,8 +43,16 @@
 
     {% if photo_finale %}
     <div class="card">
-        <h3>3. Comparaison Avant / Après</h3>
+        <h3>3. Résultats de l'analyse</h3>
         
+        {% if stats %}
+        <div class="stats-badge">
+            <strong>📊 Résultats de  :</strong><br>
+            • Groupes (classes) identifiés : <b>{{ stats.clusters }}</b><br>
+            • Bruit (pixels rejetés en noir) : <b>{{ stats.noise }}%</b>
+        </div>
+        {% endif %}
+
         <div class="comparison-container">
             <div class="image-box">
                 <p><strong>Originale</strong></p>
@@ -52,22 +61,29 @@
             </div>
 
             <div class="image-box result-box">
-                <p><strong>Après Clustering</strong></p>
+                <p><strong>DBSCAN</strong></p>
                 <img src="{{ url_for('image_externe', filename=photo_finale, dir=dossier) }}">
             </div>
         </div>
 
         <hr>
 
-        <h4>Lancer l'algorithme</h4>
-        <form action="/process_hc" method="POST">
+        <h4>Ajuster l'algorithme</h4>
+        <form action="/process_dbscan" method="POST">
             <input type="hidden" name="dossier" value="{{ dossier }}">
             <input type="hidden" name="photo" value="{{ photo_finale.split('_')[-1] }}">
-            <div style="margin-bottom: 15px;">
-                <label>Nombre de groupes (K) :</label>
-                <input type="number" name="k" value="5" min="2" max="15" style="width: 200px;">
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                <div>
+                    <label>Epsilon (Rayon de recherche) :</label>
+                    <input type="number" name="eps" value="5" min="1" max="50" step="0.5" style="width: 100%;">
+                </div>
+                <div>
+                    <label>Min Samples (Densité min.) :</label>
+                    <input type="number" name="min_samples" value="10" min="1" max="100" style="width: 100%;">
+                </div>
             </div>
-            <button type="submit" style="background-color: #1877f2; width: 100%;">Calculer la hiérarchie</button>
+            <button type="submit" style="background-color: #e91e63; width: 100%;">Relancer le scan</button>
         </form>
     </div>
     {% endif %}
