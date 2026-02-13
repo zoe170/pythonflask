@@ -1,3 +1,5 @@
+# impor
+
 
 import os
 import numpy as np
@@ -75,44 +77,40 @@ def run_clustering(method):
     photo = request.form.get('photo')
     k = int(request.form.get('k', 5))
     
-    # 1. Chargement de l'image originale
+    # 1. Chargement de l'image
     path_input = os.path.join(dossier, photo)
     img = Image.open(path_input).convert('RGB')
     
-    # 2. Redimensionnement temporaire pour la performance
+    # 2. Redimensionnement (Très important pour le CHA qui est très lent)
     limit = 100 if method == "hc" else 400
     img_small = img.copy()
     img_small.thumbnail((limit, limit))
     
-    # 3. Préparation des données
+    # 3. Préparation des données (pixels en liste de couleurs)
     img_np = np.array(img_small)
     pixels = img_np.reshape(-1, 3)
 
     # 4. Application de l'IA
     if method == "kmeans":
+        # K-Means : cherche les 'k' centres de couleurs
         model = KMeans(n_clusters=k, n_init=10, random_state=42)
         labels = model.fit_predict(pixels)
         colors = model.cluster_centers_.astype('uint8')
     else:
+        # Hiérarchique : fusionne les pixels de proche en proche
         model = AgglomerativeClustering(n_clusters=k, linkage='ward')
         labels = model.fit_predict(pixels)
+        # Calcul manuel de la couleur moyenne de chaque groupe
         colors = np.array([pixels[labels == i].mean(axis=0) for i in range(k)]).astype('uint8')
 
-    # 5. Reconstruction et remise à la taille d'origine
+    # 5. Reconstruction et sauvegarde
     new_pixels = colors[labels]
     new_img_np = new_pixels.reshape(img_np.shape)
     
-    # Création de l'image segmentée à partir des pixels traités
-    result_img = Image.fromarray(new_img_np)
-    
-    # Correction : Redimensionner pour correspondre à la taille de l'image de gauche (originale)
-    # L'utilisation de Image.NEAREST permet de garder les bords des couleurs nets.
-    result_img = result_img.resize(img.size, Image.NEAREST)
-    
     result_name = f"{method}_{k}_{photo}"
-    result_img.save(os.path.join(dossier, result_name))
+    Image.fromarray(new_img_np).save(os.path.join(dossier, result_name))
     
-    # 6. Retour vers la page correspondante
+    # 6. Retour vers la page correspondante avec le résultat
     images = [f for f in os.listdir(dossier) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
     template = "photo.html" if method == "kmeans" else "hierarchical.html"
     return render_template(template, images=images, dossier=dossier, photo_finale=result_name)

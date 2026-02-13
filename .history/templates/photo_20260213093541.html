@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>IA Galerie - K-Means</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+<body>
+
+    <h1>Ma galerie photo</h1>
+
+    <div class="card">
+        <h3>1. Choisir le répertoire</h3>
+        <form method="POST" action="/photo">
+            <!-- entre le chemin d'un dossier de son ordinateur. -->
+            <input type="text" name="chemin_dossier" value="{{ dossier }}" placeholder="Ex: C:\Users\Nom\Pictures">
+            <button type="submit">Charger les images</button>
+        </form>
+    </div>
+
+    {% if images %}
+    <div class="card">
+        <h3>2. Sélectionner une photo</h3>
+        <form method="POST" action="/photo">
+            <input type="hidden" name="chemin_dossier" value="{{ dossier }}">
+            <select name="menu_photos" onchange="this.form.submit()">
+                <option value="">-- Choisissez une image --</option>
+                <!-- créer une liste déroulante -->
+                {% for img in images %}
+                <option value="{{ img }}" {% if img == photo_finale or photo_finale == 'kmeans_' ~ img %}selected{% endif %}>
+                    {{ img }}
+                </option>
+                {% endfor %}
+            </select>
+            <noscript><button type="submit">Visualiser</button></noscript>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if photo_finale %}
+    <div class="card" style="text-align: center;">
+        <h3>Résultat</h3>
+        <p style="font-size: 0.9em; color: #666;">Fichier actuel : {{ photo_finale }}</p>
+        
+        <img src="{{ url_for('image_externe', filename=photo_finale, dir=dossier) }}" class="result-img">
+
+        <hr>
+
+        <h4>Appliquer l'algorithme K-Means</h4>
+        <p style="font-size: 0.8em;">Réduit l'image aux K couleurs les plus dominantes.</p>
+        
+        <form action="/process_kmeans" method="POST">
+            <input type="hidden" name="dossier" value="{{ dossier }}">
+            <input type="hidden" name="photo" value="{{ photo_finale }}">
+            
+            <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                <label for="k">Nombre de couleurs (K) :</label>
+                <input type="number" name="k" id="k" value="5" min="2" max="20" style="width: 70px; margin: 0;">
+            </div>
+            
+            <button type="submit" style="margin-top: 15px; background-color: #1877f2;">Lancer le clustering</button>
+        </form>
+    </div>
+    {% endif %}
+
+    <a href="/" class="btn-home">Retour à l'accueil</a>
+
+</body>
+</html>
