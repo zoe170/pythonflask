@@ -1,5 +1,6 @@
 
 import os
+import base64
 import numpy as np
 from flask import Flask, render_template, request, send_from_directory
 from sklearn.cluster import KMeans, AgglomerativeClustering
@@ -111,8 +112,6 @@ def run_clustering(method):
     
     result_name = f"{method}_{k}_{photo}"
     result_img.save(os.path.join(dossier, result_name))
-
-    
     
     # 6. Retour vers la page correspondante
     images = [f for f in os.listdir(dossier) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]

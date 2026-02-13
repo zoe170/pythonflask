@@ -1,5 +1,6 @@
 
 import os
+import base64
 import numpy as np
 from flask import Flask, render_template, request, send_from_directory
 from sklearn.cluster import KMeans, AgglomerativeClustering
